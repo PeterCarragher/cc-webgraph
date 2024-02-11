@@ -1,5 +1,32 @@
 # cc-webgraph
 
+## Setup
+First, download the vertice and edge lists. For more up-to-date webgraphs see https://commoncrawl.org/web-graphs.
+```
+mkdir ranking/data
+cd ranking/data
+wget https://data.commoncrawl.org/projects/hyperlinkgraph/cc-main-2023-may-sep-nov/domain/cc-main-2023-may-sep-nov-domain-vertices.txt.gz
+wget https://data.commoncrawl.org/projects/hyperlinkgraph/cc-main-2023-may-sep-nov/domain/cc-main-2023-may-sep-nov-domain-edges.txt.gz
+cp cc-main-2023-may-sep-nov-domain-vertices.txt.gz cc-main-2023-may-sep-nov-domain-vertices.txt.gz.2
+gzip -d cc-main-2023-may-sep-nov-domain-vertices.txt.gz.2
+cp cc-main-2023-may-sep-nov-domain-edges.txt.gz cc-main-2023-may-sep-nov-domain-edges.txt.gz.2
+gzip -d cc-main-2023-may-sep-nov-domain-edges.txt.gz.2
+```
+
+Now, compile the webgraph tools and run scripts once to generate the required BVGraph objects:
+```
+cd ../../
+mkdir output
+mvn package
+./src/script/webgraph_ranking/process_webgraph.sh preference_up ./ranking/data/cc-main-2023-may-sep-nov-domain-vertices-copy.txt.gz ./ranking/data/cc-main-2023-may-sep-nov-domain-edges-copy.txt.gz ./ranking/output/
+```
+
+Finally, run PPR experiments:
+```
+./ranking/run_all_exps.sh
+```
+
+
 Tools to construct and process web graphs from Common Crawl data
 
 ## Compiling and Packaging Java Tools
