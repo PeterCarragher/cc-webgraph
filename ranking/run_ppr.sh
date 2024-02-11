@@ -1,5 +1,5 @@
 #!/bin/bash
-cd "$(dirname "$(dirname "$0")")"
+cd "$(dirname "$(dirname "$(realpath "$0")")")"
 
 LABELS=$1   # labelled domains that we care about final ranks for
 VERTICES=$2 # the graph that PPR runs on

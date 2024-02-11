@@ -1,3 +1,5 @@
+cd "$(dirname "$(dirname "$(realpath "$0")")")"
+
 reverse_urls() {
     local url_list=$1
     tail -n +2 $url_list  > temp.txt 
@@ -24,15 +26,17 @@ reverse_urls() {
 }
 
 
-LABELS=../../link_scheme_removal/data/attributes.csv
-REL_LIST=../data/preference_vectors/domain_lists/rel_domains.txt
+LABELS=../data/attributes.csv
+REL_LIST=./ranking/data/preference_vectors/domain_lists/rel_domains.txt
 awk '$2 >= 5 { print $1 }' FS=,  $LABEL > $REL_LIST
 reverse_urls $REL_LIST
 
-UNREL_LIST=../data/preference_vectors/domain_lists/unrel_domains.txt
+UNREL_LIST=./ranking/data/preference_vectors/domain_lists/unrel_domains.txt
 awk '$2 < 5 { print $1 }' FS=,  $LABEL > $UNREL_LIST
 reverse_urls $UNREL_LIST
 
-LS_LIST=../data/preference_vectors/domain_lists/link_scheme_domains.txt
-conda activate lsr
-python3 ../../link_scheme_removal
+# LS_LIST=./ranking/data/preference_vectors/domain_lists/link_scheme_domains.txt
+# conda activate lsr
+# cd ../interventions/
+# python3 link_schemes.py > $LS_LIST
+# reverse_urls $LS_LIST
