@@ -317,7 +317,7 @@ public class JoinSortRanks {
 			} else {
 				ranksOutStream = Files.newOutputStream(Paths.get(ranksOut));
 			}
-			PrintStream out = new PrintStream(ranksOutStream, false, StandardCharsets.UTF_8);
+			PrintStream out = new PrintStream(ranksOutStream, false, "UTF8");
 			LOG.info("Loading harmonic centrality values from {}", ranksHC);
 			converter.loadHarmonicCentrality(ranksHC);
 			LOG.info("Loading page rank values from {}", ranksPR);

@@ -32,6 +32,8 @@ public class CreatePreferenceVector {
 	private LongList preferenceIds = new LongArrayList();
 	private double defaultPreferenceValue;
 	private String nextPreferenceName;
+	public boolean invertPreference;
+	public long num_ids;
 	long recordsProcessed;
 	long preferenceNamesFound;
 
@@ -112,12 +114,12 @@ public class CreatePreferenceVector {
 		if (prefIdIter.hasNext()) {
 			nextPrefId = prefIdIter.next();
 		}
-		defaultPreferenceValue = 1.0 / preferenceIds.size();
+		defaultPreferenceValue = this.invertPreference ? 1.0 / (this.num_ids - preferenceIds.size()) : 1.0 / preferenceIds.size();
 		LOG.info("Preference value = {}", defaultPreferenceValue);
 		while (id <= lastId) {
-			double res = 0.0;
+			double res = this.invertPreference ? defaultPreferenceValue : 0.0;
 			if (id == nextPrefId) {
-				res = defaultPreferenceValue;
+				res = this.invertPreference ? 0.0 : defaultPreferenceValue;
 				if (prefIdIter.hasNext()) {
 					nextPrefId = prefIdIter.next();
 				} else {
@@ -211,9 +213,13 @@ public class CreatePreferenceVector {
 		String nodesIn = args[argpos++];
 		String prefSet = args[argpos++];
 		String prefOut = args[argpos++];
-
+		String invert = args[argpos++];
 		CreatePreferenceVector converter = new CreatePreferenceVector(defaultPrefVal);
-
+		if (invert.equals("1")) {
+			converter.invertPreference = true;
+			String num_ids = args[argpos++];
+			converter.num_ids = Long.parseLong(num_ids);
+		}
 		try (Stream<String> in = Files.lines(Paths.get(nodesIn));
 				Stream<String> pref = Files.lines(Paths.get(prefSet))) {
 			DataOutputStream out;
