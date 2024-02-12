@@ -150,6 +150,7 @@ public class CreatePreferenceVector {
 	 * "https://law.di.unimi.it/software/law-docs/it/unimi/dsi/law/rank/SpectralRanking.html#isStochastic(it.unimi.dsi.fastutil.doubles.DoubleList)">isStochastic()</a>
 	 */
 	private boolean validatePreferenceVector() {
+		long preferenceNamesFound = this.invertPreference ? this.num_ids - preferenceNamesFound : preferenceNamesFound;
 		double sumPreferenceValues = preferenceNamesFound * defaultPreferenceValue;
 		if (Math.abs(sumPreferenceValues - 1.0) > 1E-6) {
 			LOG.error("Sum of preference values not within tolerance: abs({} - 1.0) > {}", sumPreferenceValues, 1E-6);
