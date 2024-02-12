@@ -1,4 +1,5 @@
 #!/bin/bash
+set -x
 cd "$(dirname "$(dirname "$(realpath "$0")")")"
 
 LABELS=../data/attributes.csv # labelled domains that we care about final ranks for 

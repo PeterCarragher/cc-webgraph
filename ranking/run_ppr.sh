@@ -1,4 +1,5 @@
 #!/bin/bash
+set -x
 cd "$(dirname "$(dirname "$(realpath "$0")")")"
 
 LABELS=$1   # labelled domains that we care about final ranks for

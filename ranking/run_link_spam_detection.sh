@@ -1,0 +1,22 @@
+#!/bin/bash
+set -x
+cd "$(dirname "$(dirname "$(realpath "$0")")")"
+
+EDGES=./ranking/data/cc-main-2023-may-sep-nov-domain-edges.txt # the graph that PPR runs on
+VERTICES=./ranking/data/cc-main-2023-may-sep-nov-domain-vertices.txt # the graph that PPR runs on
+LIST=./ranking/data/preference_vectors/domain_lists/link_scheme_domains.txt
+RANK_FILE=exp-ls-str-discover
+
+num_domains=$(wc -l <"$VERTICES")
+java -cp target/cc-webgraph-0.1-SNAPSHOT-jar-with-dependencies.jar org.commoncrawl.webgraph.CreatePreferenceVector $VERTICES $LIST $LIST.bin 0 $num_domains
+
+
+# don't use transpose as we need to compute pagerank on a reversed edgelist
+./src/script/webgraph_ranking/run_webgraph.sh it.unimi.dsi.law.rank.PageRankParallelGaussSeidel --preference-vector $LIST.bin --strongly --expand --mapped --threads 2 \
+    ./ranking/output/preference_up ./ranking/output/$RANK_FILE
+java -cp target/cc-webgraph-0.1-SNAPSHOT-jar-with-dependencies.jar org.commoncrawl.webgraph.JoinSortRanks $VERTICES ./ranking/output/$RANK_FILE.ranks ./ranking/output/$RANK_FILE.ranks ./ranking/output/$RANK_FILE.out
+
+# No need for any of this since we can just use the un-transposed BVGraph...
+# awk -F'\t' '{ print $2 "\t" $1 }' $EDGES.txt > "$EDGES"-reversed.txt
+# gzip "$EDGES"-reversed.txt
+# mv "$EDGES"-reversed.txt.gz ./ranking/data/reversed-edgelist/part-1.gz
