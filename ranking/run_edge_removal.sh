@@ -2,7 +2,7 @@
 set -x
 cd "$(dirname "$(dirname "$(realpath "$0")")")"
 
-# remove just the link schemes: https://arxiv.org/abs/2401.02379
+# remove just the link schemes: https://arxiv.org/abs/2401.02379, http://i.stanford.edu/~kvijay/krishnan-raj-airweb06.pdf
 LS_LIST=ranking/data/preference_vectors/domain_lists/link_scheme_domains.txt
 
 # remove link schemes + link spam discovered domains with high STR score: https://dl.acm.org/doi/10.1145/3366424.3385773
@@ -34,7 +34,7 @@ fetch_vertex_ids() {
 }
 
 fetch_vertex_ids $LS_LIST $VERTICES $LS_LIST.ids
-fetch_vertex_ids $LS_STR_LIST $VERTICES $LS_STR_LIST.ids
+fetch_vertex_ids $LS_STR_LIST.top1k $VERTICES $LS_STR_LIST.ids
 fetch_vertex_ids $COMBINED_DOMAINS $VERTICES $COMBINED_DOMAINS.ids
 
 remove_edges_with_source_id() {
