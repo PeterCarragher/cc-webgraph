@@ -16,7 +16,12 @@ java -cp target/cc-webgraph-0.1-SNAPSHOT-jar-with-dependencies.jar org.commoncra
     ./ranking/output/preference_up ./ranking/output/$RANK_FILE
 java -cp target/cc-webgraph-0.1-SNAPSHOT-jar-with-dependencies.jar org.commoncrawl.webgraph.JoinSortRanks $VERTICES ./ranking/output/$RANK_FILE.ranks ./ranking/output/$RANK_FILE.ranks ./ranking/output/$RANK_FILE.out
 
+awk -F'\t' '{ if ($3 < 100000) { print $0 } }' ranking/output/exp-ls-str-discover.out > ranking/output/exp-ls-str-discover-top.out 
+sort -k3,3n ranking/output/exp-ls-str-discover-top.out -o ranking/output/exp-ls-str-discover-top.out.sorted
+awk -F'\t' '{ if ($3 < 100000) { print $5 } }' ranking/output/exp-ls-str-discover.out > ranking/data/preference_vectors/domain_lists/link_scheme_str_domains.txt
+sort ranking/data/preference_vectors/domain_lists/link_scheme_str_domains.txt -o ranking/data/preference_vectors/domain_lists/link_scheme_str_domains.txt
 # No need for any of this since we can just use the un-transposed BVGraph...
 # awk -F'\t' '{ print $2 "\t" $1 }' $EDGES.txt > "$EDGES"-reversed.txt
+# sort -k1,1n -k2,2n "$EDGES"-reversed.txt -o "$EDGES"-reversed.txt
 # gzip "$EDGES"-reversed.txt
 # mv "$EDGES"-reversed.txt.gz ./ranking/data/reversed-edgelist/part-1.gz

@@ -16,3 +16,6 @@ VERTICES=./ranking/data/cc-main-2023-may-sep-nov-domain-vertices.txt # the graph
 
 ./ranking/run_ppr.sh $LABELS $VERTICES \
     ./ranking/data/preference_vectors/domain_lists/link_scheme_domains.txt exp-ls-ppr-down 1
+
+./ranking/run_ppr.sh $LABELS $VERTICES \
+    ./ranking/data/preference_vectors/domain_lists/link_scheme_str_domains.txt exp-ls-str-ppr-down 1
