@@ -5,18 +5,19 @@ cd "$(dirname "$(dirname "$(realpath "$0")")")"
 # remove just the link schemes: https://arxiv.org/abs/2401.02379
 LS_LIST=ranking/data/preference_vectors/domain_lists/link_scheme_domains.txt
 
-# remove link schemes + link spam discovered domains with high STR score: https://dl.acm.org/doi/10.1145/3366424.3385773, http://i.stanford.edu/~kvijay/krishnan-raj-airweb06.pdf
-LS_STR_LIST=ranking/data/preference_vectors/domain_lists/link_scheme_str_domains_rank_sorted.txt # only take the top 1000
-awk -F'\t' '{ if ($3 < 100000) { print $5 } }' ranking/output/exp-ls-str-discover.out > $LS_STR_LIST
-head -n 1000 $LS_STR_LIST > $LS_STR_LIST.top1k
+# remove link schemes + link spam discovered domains with high ATR score: https://dl.acm.org/doi/10.1145/3366424.3385773, http://i.stanford.edu/~kvijay/krishnan-raj-airweb06.pdf
+LS_ATR_LIST=ranking/data/preference_vectors/domain_lists/link_scheme_str_domains_rank_sorted.txt # only take the top 1000
+awk -F'\t' '{ if ($3 < 100000) { print $5 } }' ranking/output/exp-ls-str-discover.out > $LS_ATR_LIST
+head -n 1000 $LS_ATR_LIST > $LS_ATR_LIST.top1k
 
 # combined
 COMBINED_DOMAINS=ranking/data/preference_vectors/domain_lists/link_schemes_str_combined_domains.txt
-cat $LS_LIST $LS_STR_LIST.top1k > $COMBINED_DOMAINS
+cat $LS_LIST $LS_ATR_LIST.top1k > $COMBINED_DOMAINS
 
 # get node ID lists
 VERTICES=./ranking/data/cc-main-2023-may-sep-nov-domain-vertices.txt
 EDGES=./ranking/data/cc-main-2023-may-sep-nov-domain-edges.txt
+LABELS=../data/attributes.csv # labelled domains that we care about final ranks for 
 
 fetch_vertex_ids() {
     local domain_list=$1
@@ -33,10 +34,6 @@ fetch_vertex_ids() {
         }' FS=, "$domain_list" FS='\t' "$id_list" > "$output_file"
 }
 
-fetch_vertex_ids $LS_LIST $VERTICES $LS_LIST.ids
-fetch_vertex_ids $LS_STR_LIST.top1k $VERTICES $LS_STR_LIST.ids
-fetch_vertex_ids $COMBINED_DOMAINS $VERTICES $COMBINED_DOMAINS.ids
-
 remove_edges_with_source_id() {
     local id_list=$1
     local edge_list=$2
@@ -46,28 +43,29 @@ remove_edges_with_source_id() {
             next
         } 
         {
-            if (!($1 in ids)) {
+            if (!($1 in ids) && !($2 in ids)) {
                 print $0;
             }
         }' FS='\t' "$id_list" FS='\t' "$edge_list" > "$output_file"
 }
 
-remove_edges_with_source_id $LS_LIST.ids $EDGES $EDGES.ls_filtered
-remove_edges_with_source_id $LS_STR_LIST.ids $EDGES $EDGES.ls_str_filtered
-remove_edges_with_source_id $COMBINED_DOMAINS.ids $EDGES $EDGES.ls_combined_filtered
+run_edge_removal_exp() {
+    local exp_name=$1
+    local vertex_list=$2
 
-gzip $EDGES.ls_filtered
-gzip $EDGES.ls_str_filtered
-gzip $EDGES.ls_combined_filtered
+    fetch_vertex_ids $vertex_list $VERTICES $vertex_list.ids
+    remove_edges_with_source_id $vertex_list.ids $EDGES $EDGES.$exp_name
+    gzip $EDGES.$exp_name
+    mkdir ranking/output/$exp_name/
+    ./src/script/webgraph_ranking/process_webgraph.sh $exp_name ./ranking/data/cc-main-2023-may-sep-nov-domain-vertices-copy.txt.gz $EDGES.$exp_name.gz ./ranking/output/$exp_name/
+    gzip -d ranking/output/$exp_name/$exp_name-ranks.txt.gz
+    source ranking/filter_rank_output.sh $LABELS $exp_name ./ranking/output/$exp_name/
+}
 
-mkdir ranking/output/ls_filtered/
-mkdir ranking/output/ls_str_filtered/
-mkdir ranking/output/ls_combined_filtered/
-
-./src/script/webgraph_ranking/process_webgraph.sh ls_filtered ./ranking/data/cc-main-2023-may-sep-nov-domain-vertices-copy.txt.gz ./ranking/data/cc-main-2023-may-sep-nov-domain-edges-copy.txt.ls_filtered.gz ./ranking/output/ls_filtered/
-./src/script/webgraph_ranking/process_webgraph.sh ls_str_filtered ./ranking/data/cc-main-2023-may-sep-nov-domain-vertices-copy.txt.gz ./ranking/data/cc-main-2023-may-sep-nov-domain-edges-copy.txt.ls_str_filtered.gz ./ranking/output/ls_str_filtered/
-./src/script/webgraph_ranking/process_webgraph.sh ls_combined_filtered ./ranking/data/cc-main-2023-may-sep-nov-domain-vertices-copy.txt.gz ./ranking/data/cc-main-2023-may-sep-nov-domain-edges-copy.txt.ls_combined_filtered.gz ./ranking/output/ls_combined_filtered/
+run_edge_removal_exp ls_filtered $LS_LIST
+run_edge_removal_exp ls_atr_filtered $LS_ATR_LIST
+run_edge_removal_exp ls_combined_filtered $COMBINED_DOMAINS
 
 # TODO: bow-tie model
-# remove all backlinkers that do not have links from the center
+# remove only the backlinkers that do not have links from the center (left side of bow-tie model)
 
