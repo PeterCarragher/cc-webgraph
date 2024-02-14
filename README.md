@@ -21,11 +21,17 @@ mvn package
 ./src/script/webgraph_ranking/process_webgraph.sh preference_up ./ranking/data/cc-main-2023-may-sep-nov-domain-vertices-copy.txt.gz ./ranking/data/cc-main-2023-may-sep-nov-domain-edges-copy.txt.gz ./ranking/output/
 ```
 
-Finally, run PPR experiments:
+Run PPR experiments:
 ```
+./ranking/prepare_ppr_domain_list.sh
+./ranking/run_link_spam_detection.sh
 ./ranking/run_all_exps.sh
 ```
 
+Run Edge removal experiments:
+```
+./ranking/run_edge_removal.sh
+```
 
 Tools to construct and process web graphs from Common Crawl data
 

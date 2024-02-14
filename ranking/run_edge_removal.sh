@@ -2,10 +2,10 @@
 set -x
 cd "$(dirname "$(dirname "$(realpath "$0")")")"
 
-# remove just the link schemes: https://arxiv.org/abs/2401.02379, http://i.stanford.edu/~kvijay/krishnan-raj-airweb06.pdf
+# remove just the link schemes: https://arxiv.org/abs/2401.02379
 LS_LIST=ranking/data/preference_vectors/domain_lists/link_scheme_domains.txt
 
-# remove link schemes + link spam discovered domains with high STR score: https://dl.acm.org/doi/10.1145/3366424.3385773
+# remove link schemes + link spam discovered domains with high STR score: https://dl.acm.org/doi/10.1145/3366424.3385773, http://i.stanford.edu/~kvijay/krishnan-raj-airweb06.pdf
 LS_STR_LIST=ranking/data/preference_vectors/domain_lists/link_scheme_str_domains_rank_sorted.txt # only take the top 1000
 awk -F'\t' '{ if ($3 < 100000) { print $5 } }' ranking/output/exp-ls-str-discover.out > $LS_STR_LIST
 head -n 1000 $LS_STR_LIST > $LS_STR_LIST.top1k
@@ -60,6 +60,13 @@ gzip $EDGES.ls_filtered
 gzip $EDGES.ls_str_filtered
 gzip $EDGES.ls_combined_filtered
 
+mkdir ranking/output/ls_filtered/
+mkdir ranking/output/ls_str_filtered/
+mkdir ranking/output/ls_combined_filtered/
+
+./src/script/webgraph_ranking/process_webgraph.sh ls_filtered ./ranking/data/cc-main-2023-may-sep-nov-domain-vertices-copy.txt.gz ./ranking/data/cc-main-2023-may-sep-nov-domain-edges-copy.txt.ls_filtered.gz ./ranking/output/ls_filtered/
+./src/script/webgraph_ranking/process_webgraph.sh ls_str_filtered ./ranking/data/cc-main-2023-may-sep-nov-domain-vertices-copy.txt.gz ./ranking/data/cc-main-2023-may-sep-nov-domain-edges-copy.txt.ls_str_filtered.gz ./ranking/output/ls_str_filtered/
+./src/script/webgraph_ranking/process_webgraph.sh ls_combined_filtered ./ranking/data/cc-main-2023-may-sep-nov-domain-vertices-copy.txt.gz ./ranking/data/cc-main-2023-may-sep-nov-domain-edges-copy.txt.ls_combined_filtered.gz ./ranking/output/ls_combined_filtered/
 
 # TODO: bow-tie model
 # remove all backlinkers that do not have links from the center
