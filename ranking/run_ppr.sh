@@ -17,34 +17,5 @@ else # Baseline
     ./src/script/webgraph_ranking/run_webgraph.sh it.unimi.dsi.law.rank.PageRankParallelGaussSeidel --expand --mapped --threads 2 ./ranking/output/preference_up-t ./ranking/output/$RANK_FILE
 fi
 
-java -cp target/cc-webgraph-0.1-SNAPSHOT-jar-with-dependencies.jar org.commoncrawl.webgraph.JoinSortRanks $VERTICES ./ranking/output/$RANK_FILE.ranks ./ranking/output/$RANK_FILE.ranks ./ranking/output/ranks/$RANK_FILE.out
-
-filter_giant_file() {
-    local labeled_list=$1
-    local giant_file=$2
-    local output_file=$3
-    local giant_url_col=$4
-
-    echo "$labeled_list"
-    echo "$giant_file"
-    echo "$output_file"
-
-    awk -v col="$giant_url_col" \
-        'NR==FNR { 
-            url = $1; 
-            split(url, parts, "."); 
-            reverse_url = parts[length(parts)]; 
-            for (i=length(parts)-1; i>0; i--) 
-                reverse_url = reverse_url "." parts[i]; 
-            urls[reverse_url] = 1
-            next 
-        } 
-        {
-            url = $col;
-            if (url in urls) {
-                print $0;
-            }
-        }' FS=, "$labeled_list" FS='\t' "$giant_file" > "$output_file"
-}
-
-filter_giant_file $LABELS ./ranking/output/ranks/$RANK_FILE.out ./ranking/output/ranks/$RANK_FILE.label_only.out 5
+java -cp target/cc-webgraph-0.1-SNAPSHOT-jar-with-dependencies.jar org.commoncrawl.webgraph.JoinSortRanks $VERTICES ./ranking/output/$RANK_FILE.ranks ./ranking/output/$RANK_FILE.ranks ./ranking/output/ranks/$RANK_FILE-ranks.txt
+source ranking/filter_rank_output.sh $LABELS $RANK_FILE ./ranking/output/ranks/

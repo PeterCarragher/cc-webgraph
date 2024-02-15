@@ -6,12 +6,12 @@ cd "$(dirname "$(dirname "$(realpath "$0")")")"
 LS_LIST=ranking/data/preference_vectors/domain_lists/link_scheme_domains.txt
 
 # remove link schemes + link spam discovered domains with high ATR score: https://dl.acm.org/doi/10.1145/3366424.3385773, http://i.stanford.edu/~kvijay/krishnan-raj-airweb06.pdf
-LS_ATR_LIST=ranking/data/preference_vectors/domain_lists/link_scheme_str_domains_rank_sorted.txt # only take the top 1000
-awk -F'\t' '{ if ($3 < 100000) { print $5 } }' ranking/output/exp-ls-str-discover.out > $LS_ATR_LIST
+LS_ATR_LIST=ranking/data/preference_vectors/domain_lists/link_scheme_atr_domains_rank_sorted.txt # only take the top 1000
+awk -F'\t' '{ if ($3 < 100000) { print $5 } }' ranking/output/exp-ls-atr-discover.out > $LS_ATR_LIST
 head -n 1000 $LS_ATR_LIST > $LS_ATR_LIST.top1k
 
 # combined
-COMBINED_DOMAINS=ranking/data/preference_vectors/domain_lists/link_schemes_str_combined_domains.txt
+COMBINED_DOMAINS=ranking/data/preference_vectors/domain_lists/link_schemes_atr_combined_domains.txt
 cat $LS_LIST $LS_ATR_LIST.top1k > $COMBINED_DOMAINS
 
 # get node ID lists
@@ -32,6 +32,7 @@ fetch_vertex_ids() {
                 print $1;
             }
         }' FS=, "$domain_list" FS='\t' "$id_list" > "$output_file"
+    sort "$output_file" -o "$output_file"
 }
 
 remove_edges_with_source_id() {
@@ -43,7 +44,7 @@ remove_edges_with_source_id() {
             next
         } 
         {
-            if (!($1 in ids) && !($2 in ids)) {
+            if (!($1 in ids)) {
                 print $0;
             }
         }' FS='\t' "$id_list" FS='\t' "$edge_list" > "$output_file"
