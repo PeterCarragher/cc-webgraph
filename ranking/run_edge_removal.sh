@@ -32,7 +32,7 @@ fetch_vertex_ids() {
                 print $1;
             }
         }' FS=, "$domain_list" FS='\t' "$id_list" > "$output_file"
-    sort "$output_file" -o "$output_file"
+    sort -n "$output_file" -o "$output_file"
 }
 
 remove_edges_with_source_id() {
@@ -44,7 +44,7 @@ remove_edges_with_source_id() {
             next
         } 
         {
-            if (!($1 in ids)) {
+            if (!($1 in ids) && !($2 in ids)) {
                 print $0;
             }
         }' FS='\t' "$id_list" FS='\t' "$edge_list" > "$output_file"
@@ -64,7 +64,7 @@ run_edge_removal_exp() {
 }
 
 run_edge_removal_exp ls_filtered $LS_LIST
-run_edge_removal_exp ls_atr_filtered $LS_ATR_LIST
+run_edge_removal_exp ls_atr_filtered $LS_ATR_LIST.top1k
 run_edge_removal_exp ls_combined_filtered $COMBINED_DOMAINS
 
 # TODO: bow-tie model
