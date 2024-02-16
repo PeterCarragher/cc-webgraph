@@ -4,7 +4,8 @@ cd "$(dirname "$(dirname "$(realpath "$0")")")"
 
 EDGES=./ranking/data/cc-main-2023-may-sep-nov-domain-edges.txt # the graph that PPR runs on
 VERTICES=./ranking/data/cc-main-2023-may-sep-nov-domain-vertices.txt # the graph that PPR runs on
-LIST=./ranking/data/preference_vectors/domain_lists/link_scheme_domains.txt
+# LIST=./ranking/data/preference_vectors/domain_lists/link_scheme_domains.txt
+LIST=ranking/data/preference_vectors/domain_lists/cc_link_scheme_domains.txt.domains.final
 RANK_FILE=exp-ls-atr-discover
 
 num_domains=$(wc -l <"$VERTICES")

@@ -3,7 +3,8 @@ set -x
 cd "$(dirname "$(dirname "$(realpath "$0")")")"
 
 # remove just the link schemes: https://arxiv.org/abs/2401.02379
-LS_LIST=ranking/data/preference_vectors/domain_lists/link_scheme_domains.txt
+# LS_LIST=ranking/data/preference_vectors/domain_lists/link_scheme_domains.txt
+LS_LIST=ranking/data/preference_vectors/domain_lists/cc_link_scheme_domains.txt.domains.final
 
 # remove link schemes + link spam discovered domains with high ATR score: https://dl.acm.org/doi/10.1145/3366424.3385773, http://i.stanford.edu/~kvijay/krishnan-raj-airweb06.pdf
 LS_ATR_LIST=ranking/data/preference_vectors/domain_lists/link_scheme_atr_domains_rank_sorted.txt # only take the top 1000
@@ -57,13 +58,13 @@ run_edge_removal_exp() {
     fetch_vertex_ids $vertex_list $VERTICES $vertex_list.ids
     remove_edges_with_source_id $vertex_list.ids $EDGES $EDGES.$exp_name
     gzip $EDGES.$exp_name
-    mkdir ranking/output/$exp_name/
+    rm -rf ranking/output/$exp_name/ && mkdir ranking/output/$exp_name/
     ./src/script/webgraph_ranking/process_webgraph.sh $exp_name ./ranking/data/cc-main-2023-may-sep-nov-domain-vertices-copy.txt.gz $EDGES.$exp_name.gz ./ranking/output/$exp_name/
     gzip -d ranking/output/$exp_name/$exp_name-ranks.txt.gz
     source ranking/filter_rank_output.sh $LABELS $exp_name ./ranking/output/$exp_name/
 }
 
-run_edge_removal_exp ls_filtered $LS_LIST
+# run_edge_removal_exp ls_filtered $LS_LIST
 run_edge_removal_exp ls_atr_filtered $LS_ATR_LIST.top1k
 run_edge_removal_exp ls_combined_filtered $COMBINED_DOMAINS
 
