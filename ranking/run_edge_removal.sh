@@ -7,13 +7,19 @@ cd "$(dirname "$(dirname "$(realpath "$0")")")"
 LS_LIST=ranking/data/preference_vectors/domain_lists/cc_link_scheme_domains.txt.domains.final
 
 # remove link schemes + link spam discovered domains with high ATR score: https://dl.acm.org/doi/10.1145/3366424.3385773, http://i.stanford.edu/~kvijay/krishnan-raj-airweb06.pdf
-LS_ATR_LIST=ranking/data/preference_vectors/domain_lists/link_scheme_atr_domains_rank_sorted.txt # only take the top 1000
-awk -F'\t' '{ if ($3 < 100000) { print $5 } }' ranking/output/exp-ls-atr-discover.out > $LS_ATR_LIST
-head -n 1000 $LS_ATR_LIST > $LS_ATR_LIST.top1k
+LS_ATR_LIST=ranking/data/preference_vectors/domain_lists/cc_link_scheme_atr_domains_rank_sorted.txt # only take the top 1000
+head -n 1000 ranking/output/exp-ls-atr-discover-top.out.sorted |  awk -F'\t' ' { print $5 }' > $LS_ATR_LIST.top1k
 
 # combined
-COMBINED_DOMAINS=ranking/data/preference_vectors/domain_lists/link_schemes_atr_combined_domains.txt
+COMBINED_DOMAINS=ranking/data/preference_vectors/domain_lists/cc_link_schemes_atr_combined_domains.txt
 cat $LS_LIST $LS_ATR_LIST.top1k > $COMBINED_DOMAINS
+
+# multi-domain/home/pcarragh/dev/link_scheme_removal/cc-webgraph/ranking/
+MULTI_DOMAIN_ATR_LIST=ranking/output/exp-multi-domain-casino-discover-top.out.sorted # only take the top 1000
+head -n 20000 $MULTI_DOMAIN_ATR_LIST |  awk -F'\t' ' { print $5 }' > $MULTI_DOMAIN_ATR_LIST.top20k
+
+MULTI_COMBINED=ranking/data/preference_vectors/domain_lists/cc_multi_domain_link_schemes_atr_20k.txt
+cat $COMBINED_DOMAINS $MULTI_DOMAIN_ATR_LIST.top20k > $MULTI_COMBINED
 
 # get node ID lists
 VERTICES=./ranking/data/cc-main-2023-may-sep-nov-domain-vertices.txt
@@ -64,9 +70,11 @@ run_edge_removal_exp() {
     source ranking/filter_rank_output.sh $LABELS $exp_name ./ranking/output/$exp_name/
 }
 
-# run_edge_removal_exp ls_filtered $LS_LIST
+run_edge_removal_exp ls_filtered $LS_LIST
 run_edge_removal_exp ls_atr_filtered $LS_ATR_LIST.top1k
 run_edge_removal_exp ls_combined_filtered $COMBINED_DOMAINS
+run_edge_removal_exp ls_multi_domain_atr $MULTI_DOMAIN_ATR_LIST.top20k
+run_edge_removal_exp ls_multi_domain_atr_combined $MULTI_COMBINED
 
 # TODO: bow-tie model
 # remove only the backlinkers that do not have links from the center (left side of bow-tie model)
