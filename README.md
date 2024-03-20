@@ -26,7 +26,12 @@ Run PPR experiments:
 ./ranking/prepare_ppr_domain_list.sh
 ./ranking/run_link_spam_detection.sh
 ./ranking/run_all_exps.sh
-cd ranking/casinos && ./run_multi_category_ppr_exp.sh
+```
+
+Run Multi-Category Link Scheme experiment:
+```
+cd ranking/casinos
+./run_multi_category_ppr_exp.sh
 ```
 
 Run Edge removal experiments:
@@ -34,8 +39,11 @@ Run Edge removal experiments:
 ./ranking/run_edge_removal.sh
 ```
 
-
+Generate pre-post intervention plot and multi-category link scheme hexplot:
+```
+cd ranking
+Rscript intervention_graphs.R
+```
 
 ## Credits
-
 Thanks to the authors of the [WebGraph framework](https://webgraph.di.unimi.it/) used to process the graphs and compute page rank and harmonic centrality. See also Sebastiano Vigna's projects [webgraph](//github.com/vigna/webgraph) and [webgraph-big](//github.com/vigna/webgraph-big).
