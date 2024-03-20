@@ -124,7 +124,6 @@ filter_labelled_domains $REL_LIST $LS_LIST.domains
 
 
 awk '$2 > threshold { print $1 }' threshold=150 $LS_LIST.domains > $LS_LIST.domains.final
-
 # sort -n $LS_LIST -o $LS_LIST
 
 # conda activate lsr
